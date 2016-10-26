@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+{% extends "layout.html" %}
+{% block body %}
+
+    <div id="form">
+       <form action="{{ url_for('register') }}" method="POST">
+            <dl>
+                <dd><select name="title">
+                    <option value=" " disabled selected>Title</option>
+                    <option value="mr">Mr.</option>
+                    <option value="ms">Ms.</option>
+                    <option value="dr">Dr.</option>
+                    <option value="prof">Prof.</option>
+                </select>
+                </dd>
+
+                <dd><input class="tb5" type="text" name="name" placeholder="Name">
+
+                <dd><input class="tb5" type="text" name="username" placeholder="Username">
+
+                <dd><input class="tb5" type="email" name="email"  placeholder="Email">
+
+                <dd><input class="tb5" type="password" name="password" placeholder="Password">
+
+                <dd><input class="tb5" type="password" name="confirmpass" placeholder="Confirm-Password">
+                <h6><i id="reset">If you are registering as a coordinator, provide a passphrase below.</i></h6>
+                <dd><input class="tb5" type="password" name="passphrase" placeholder="Passphrase(Coordinators only)">
+                <dd>
+                    <label class="checkbox" for="option">Lecturer
+                        <input type="radio" name="type" value="1">
+                    </label>
+                <label class="checkbox" for="option">Coordinator
+                        <input type="radio" name="type" value="0">
+                </label>
+                <dd><input id="submit" type="submit" value="Register">
+            </dl>
+        </form>
+    </div>
+
+{% endblock %}

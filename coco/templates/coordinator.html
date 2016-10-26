@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+{% extends "layout.html" %}
+{% block body %}
+<script xmlns="http://www.w3.org/1999/html">
+function pushNextSemester(){
+    var currentdate = new Date();
+    var year = currentdate.getFullYear();
+    select = document.getElementById('semester');
+    select.options[1] = new Option('Winter semester '+year, 'ws')
+    select.options[2] = new Option('Summer semester '+year, 'ss')
+}
+
+</script>
+
+<div class="metanav" >
+    </br> </br>
+    <!--<form method="post" action="{{ url_for('coordinator_menu') }}">-->
+    <a href="{{url_for('semester')}}">Add new semester</a>
+    <center>
+        <label style="font-size:18px;font-style:bold">Select Semester</label>&nbsp;
+          <select tabIndex="1" name="semester" id="semester" onchange="javascript:location.href = this.value"> <!--onclick="pushNextSemester()" -->
+              <option value="" disabled selected>Select</option>
+              {% for s in semesters %}
+              <option value="{{ url_for('coordinator_menu') }}?semester={{s.id}}">{{ s.semester}} {{ s.years }}</option>
+              {% endfor %}
+            </select>
+        </br></br>
+
+    </center>
+
+</div>
+{% endblock %}

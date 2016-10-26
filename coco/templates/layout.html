@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<title>CoCo</title>
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.CSS') }}">
+
+</head>
+
+<body>
+ <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    <div class="page">
+        <img class="displayed" src="{{ url_for('static', filename='unisaar.jpeg') }}" alt="Saarland University Logo">
+        <div class="metanav">
+        {% if not export %}
+            {% if not session.logged_in %}
+                <a href="{{ url_for('index') }}"><button id="submit">Home</button></a>
+                {% if not passp %}<a href="{{ url_for('helper') }}" style= "float: right"><button id="submit">Help</button></a>
+                {% endif %}
+            {% else %}
+                {% if session.type == 0 %}
+                    {% if session.home == 0 %}
+                    <a href="{{ url_for('coordinators')}}"><button id="submit">Home</button></a>
+                    <a style= "float: left" href="{{ url_for('coordinator_menu')}}?semester={{session['current_semester']}}"><button id="submit">Menu</button></a>
+                    {% endif %}
+                {% endif %}
+                <a href="{{ url_for('logout') }}"><button id="submit">Log out</button></a>
+                <span id="identifier"><label>Logged in as: {{client}}</label></span>
+                <li><a href="{{ url_for('changepassword', **request.args) }}">Change password</a></li>
+            {% endif %}
+            {% endif %}
+        </div>
+        {% for message in get_flashed_messages() %}
+            <div class="flash">{{ message }}</div>
+        {% endfor %}
+        {% block body%}
+        {% endblock %}
+        {% if not export %}
+        <div id="copy"><p><span class="copy-left">&copy;</span><span>&nbsp;2016 CoCo</span></p></div>
+        {% endif %}
+        <br><br><br>
+    </div>
+
+</body>
+</html>

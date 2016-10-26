@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+{% extends "layout.html" %}
+{% block body %}
+
+<script>
+var z;var cDown;var cUp;var oTab; var notchanged;
+if(localStorage.getItem("bool")){
+    notchanged = false;
+}else{
+    notchanged = true;
+}
+function readC(c){
+    var cel = document.getElementById('tab').getElementsByTagName('td');
+    for(var i=0;i<cel.length;i++){
+        if(c==cel[i]){z=i}
+    }
+    
+    cDown = c.cloneNode(c);
+}
+function writeC(c){
+    var cel = document.getElementById('tab').getElementsByTagName('td');
+    if(c!=cel[z]){
+        var oldRoot = cel[z].parentNode;
+        var oldId = cel[z].children[0].name;
+        var newRoot = c.parentNode;
+        var newId = c.children[0].name;
+        c.children[0].setAttribute("name",oldId);
+        cUp=c.cloneNode(c)
+        cDown.children[0].setAttribute("name",newId);
+        oldRoot.replaceChild(cUp,cel[z])
+        newRoot.replaceChild(cDown,c)
+    }
+}
+
+</script>
+
+<div class="metanav" >
+	{% if not export %}
+    <label name="msg" style="font-size:14px;font-style:oblique;text-align:center;display:block;">
+    The saved schedule for the semester is displayed below
+     </label>
+	{% endif %}
+</div>
+
+<center>
+
+  <div style="margin-top:20px">
+
+      <form class="form" action="{{ url_for('save_changed_schedule', **request.args) }}" method="POST">
+          {% if not export %}
+          <a href="#" class="tooltip">
+            <img id="infobutton" src="{{ url_for('static', filename='MB__info.png') }}" />
+              <span style="width:auto;">
+                  <h5>Changing assigned timeslots hint</h5>
+                  <h5>Drag and drop in the respective position
+                  </h5>
+              </span>
+          </a>
+        <div
+         style="-moz-user-select: none; -webkit-user-select: none; -ms-user-select:none; user-select:none;-o-user-select:none;"
+         unselectable="on"
+         onselectstart="return false;">
+          {% endif %}
+
+          <table border=".5" id="tab">
+              <tr>
+                  <th>&nbsp;</th>
+                  <th style="padding:3px;">Monday</th>
+                  <th style="padding:3px;">Tuesday</th>
+                  <th style="padding:3px;">Wednesday</th>
+                  <th style="padding:3px;">Thursday</th>
+                  <th style="padding:3px;">Friday</th>
+              </tr>
+             {% for time in times %}
+                <tr>
+                    <th style="padding:3px;"> {{time}}</th>
+                    {% for index in range(5) %}
+                        {% if index in prefs%}
+                            {% if times.index(time) in prefs[index] %}
+                                <td onmousedown="readC(this)" onmouseup="writeC(this)" style="background:{{prefs[index][times.index(time)][0][1]}};padding:3px;">
+
+                                    <input type="hidden" value="{{prefs[index][times.index(time)][0][2]}}:{{prefs[index][times.index(time)][0][3]}}" 
+                                     name="{{times.index(time)}}{{index}}" >
+                                    <label name="lab{{times.index(time)}}{{index}}" id="lab{{times.index(time)}}{{index}}" class="labelincell">
+                                    <b>{{prefs[index][times.index(time)][0][2]}}</b>
+                                    <br />{{prefs[index][times.index(time)][0][3]}}
+                                    </label>
+                                </td>
+                            {% else %}
+                                <td onmousedown="readC(this)" onmouseup="writeC(this)" >
+                                <input type="hidden" value="0"  name="{{times.index(time)}}{{index}}" >
+                                	<label name="lab{{times.index(time)}}{{index}}" id="lab{{times.index(time)}}{{index}}" class="labelincell"></label>
+                                </td>
+                             {% endif %}
+                        {% else %}
+                            <td onmousedown="readC(this)" onmouseup="writeC(this)" >
+                            <input type="hidden" value="0"  name="{{times.index(time)}}{{index}}" >
+                                <label name="lab{{times.index(time)}}{{index}}" id="lab{{times.index(time)}}{{index}}" class="labelincell"></label>
+                            </td>
+                        {% endif %}
+                    {% endfor %}
+                </tr>
+                {% endfor %}
+          </table>
+            </div>
+          <br><br>{% if not export %}
+          <input style="float:left;margin-left:10%;" id="submit" type="submit" value="
+Save Changes
+        ">
+          {% endif %}
+         </form>
+		<form class="form" action="{{ url_for('export_schedule', **request.args) }}" method="POST">
+		{% if not export %}
+          <button style="float:left;margin-left:10%;" id="submit" value="">
+          Export the schedule<br/> to PDF
+          </button>
+          {% endif %}
+         </form>          
+        <form class="form" action="{{ url_for('send_schedule', **request.args) }}" method="POST">
+        {% if not export %}
+          <button id="submit" value="">Send the schedule <br/>to lecturers</button>
+          {% endif %}
+        </form>
+      <br><br>
+
+  </div>
+
+</center>
+
+{% endblock %}

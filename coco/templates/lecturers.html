@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+{% extends "layout.html" %}
+{% block body %}
+<script>
+var color = '';
+function markTimeSlot(obj,busy){
+          if((obj.style.backgroundColor == '' )||((obj.style.backgroundColor == 'grey')&& (busy == true))){
+            obj.style.backgroundColor = 'lightgreen';
+            color = 3;
+            updateValue(obj, color);
+          }else if(obj.style.backgroundColor == 'lightgreen'){
+            obj.style.backgroundColor = 'yellow';
+            color = 2;
+            updateValue(obj, color);
+          }else if(obj.style.backgroundColor == 'yellow'){
+            obj.style.backgroundColor = 'tomato';
+            color = 0;
+            updateValue(obj, color);
+          }else{
+            if (busy == true)
+                obj.style.backgroundColor = 'grey';
+            else
+                obj.style.backgroundColor = '';
+            color = 1;
+            updateValue(obj, color);
+          }
+}
+
+function resetColor() {
+
+  var x = document.getElementById("timeslots").getElementsByTagName("td");
+
+      for (var i=0; i<x.length; i++){
+
+              x[i].style.backgroundColor = '';
+               updateValue(x[i], 1);
+
+       }
+}
+
+function updateValue(obj, color){
+    obj.children[0].value = color;
+}
+
+function checkVals() {
+	var errmsg = "";
+	if (document.getElementById("courses").value == "")
+		errmsg += "Select the course";
+	if (document.getElementById("hours").value == "")
+		errmsg += "\nSelect hours per week";
+	var x = document.getElementById("timeslots").getElementsByTagName("td");
+	var counter = 0;
+      for (var i=0; i<x.length; i++){
+      	if (x[i].children[0].value != 1) counter++;
+       }   
+	if (counter == 0) errmsg += "\nSet your preferences";
+	if (errmsg!="") alert(errmsg);  
+ }
+ 
+function loadMarks(){
+data = JSON.stringify(document.getElementById("courses").options[document.getElementById("courses").selectedIndex].value);
+
+$.ajax({
+		url:document.URL,
+		type:"POST",
+		contentType: "application/json",
+		data: data,
+		success: function( response ){
+			document.open();
+			document.write(response);
+			document.close();
+		},
+		error: function( xhr, status, errorThrown ) {
+        	alert( "Sorry, there was a problem!" );
+        	console.log( "Error: " + errorThrown );
+	        console.log( "Status: " + status );
+	        console.dir( xhr );
+        }});
+}
+</script>
+
+<div class="metanav" >
+    {%if not add and semester_set%}
+         <a href="{{ url_for('add_pref') }}"><button id="submit">Add Preferences</button></a>
+    {%endif%}
+    {% if add and semester_set%}
+    <label name="msg" style="font-size:16px;font-style:oblique;text-align:center;display:block;">
+    Please fill the information about the course<br>
+    Pay attention selecting grey timeslot, there is some event planned
+    </label>
+
+</div>
+
+<center>
+
+  <div style="margin-top:20px">
+
+
+      <form action="{{ url_for('get_prefs') }}" method="POST">
+
+          <select tabIndex="1" name="courses" id="courses" onchange="loadMarks();">
+
+              <option value="" disabled selected>Course name</option>
+            {% for c in courses%}
+              {% if c.id == current %}
+                <option selected="selected" value="{{c.id}}">{{c.course}}</option>
+             {%else%}
+                <option value="{{c.id}}">{{c.course}}</option><!-- -->
+              {% endif%}
+            {% endfor %}
+          </select>
+
+                      &nbsp;&nbsp;
+
+          <select id="hours" name="hours" tabIndex="2">
+
+              <option value="" disabled selected>Hrs Per Week</option>
+                 {% if hrs == '2 hrs' %}
+                   <option selected="selected">2 hrs</option>
+                {% else%}
+                  <option>2 hrs</option>
+                  {% endif%}
+                   {% if hrs == '4 hrs' %}
+                  <option selected="selected">4 hrs</option>
+                {% else%}
+                  <option>4 hrs</option>
+                  {% endif%}
+
+          </select>
+
+          <br><br>
+          <a href="#" class="tooltip">
+            <img id="infobutton" src="{{ url_for('static', filename='MB__info.png') }}" />
+              <span>
+                  <h5>Timeslot Color Codes</h5>
+                  <ul>
+                      <li>Green (one click): Best Fit</li>
+                      <li>Yellow (two clicks): Okay</li>
+                      <li>Red (three clicks): Not Possible</li>
+
+                      <li>Grey: Pay attention selecting this timeslot, there is some event planned</li>
+                      <li>White: No selection</li>
+                  </ul>
+              </span>
+          </a>
+
+
+          <table border=".5" id="timeslots">
+              <tr>
+                  <th>&nbsp;</th>
+                  <th>Monday</th>
+                  <th>Tuesday</th>
+                  <th>Wednesday</th>
+                  <th>Thursday</th>
+                  <th>Friday</th>
+              </tr>
+             {% for time in times %}
+                <tr>
+                    <th> {{time}}</th>
+                    {% for index in range(5) %}
+                        {% if index in prefs%}
+                            {% if times.index(time) in prefs[index] %}
+                                {% if index in busy_times%}
+                                    {% if times.index(time) in busy_times[index] %}
+                                        <td onclick="markTimeSlot(this,true)" style="background:{{prefs[index][times.index(time)][0][1]}}">
+                                              <input type="hidden" value="{{prefs[index][times.index(time)][0][0]}}"  name="{{times.index(time)}}{{index}}" >
+                                            <label class="labelincell">{{busy_times[index][times.index(time)][0][2]}}</label>
+                                         </td>
+                                    {% else %}
+                                       <td onclick="markTimeSlot(this,false)" style="background:{{prefs[index][times.index(time)][0][1]}}">
+                                             <input type="hidden" value="{{prefs[index][times.index(time)][0][0]}}"  name="{{times.index(time)}}{{index}}" >
+                                       </td>
+                                    {% endif %}
+                                {% else %}
+                                    <td onclick="markTimeSlot(this,false)" style="background:{{prefs[index][times.index(time)][0][1]}}">
+                                    <input type="hidden" value="{{prefs[index][times.index(time)][0][0]}}"  name="{{times.index(time)}}{{index}}" >
+                                </td>
+                                {% endif %}
+                            {% else %}
+                                {% if index in busy_times%}
+                                    {% if times.index(time) in busy_times[index] %}
+                                        <td onclick="markTimeSlot(this,true)" style="background:grey;" ><input type="hidden" value=1 name="{{times.index(time)}}{{index}}" >
+                                         <label class="labelincell">{{busy_times[index][times.index(time)][0][2]}}</label>
+                                        </td>
+                                    {% else %}
+                                        <td onclick="markTimeSlot(this,false)" ><input type="hidden" value=1 name="{{times.index(time)}}{{index}}" ></td>
+                                    {% endif %}
+                                {% else %}
+                                    <td onclick="markTimeSlot(this,false)" ><input type="hidden" value=1 name="{{times.index(time)}}{{index}}" ></td>
+                                {% endif %}
+                             {% endif %}
+                        {% else %}
+                            {% if index in busy_times%}
+                                {% if times.index(time) in busy_times[index] %}
+                                    <td onclick="markTimeSlot(this,true)" style="background:grey;" ><input type="hidden" value=1 name="{{times.index(time)}}{{index}}" >
+                                     <label class="labelincell">{{busy_times[index][times.index(time)][0][2]}}</label>
+                                    </td>
+                                {% else %}
+                                    <td onclick="markTimeSlot(this,false)" ><input type="hidden" value=1 name="{{times.index(time)}}{{index}}" ></td>
+                                {% endif %}
+                            {% else %}
+                                <td onclick="markTimeSlot(this,false)" ><input type="hidden" value=1 name="{{times.index(time)}}{{index}}" ></td>
+                            {% endif %}
+                        {% endif %}
+                    {% endfor %}
+                </tr>
+                {% endfor %}
+          </table>
+          <br><br>
+
+          <input id="submit" type="submit" value="Submit" onclick="checkVals()">
+          <input id="submit" type="reset" value="Reset" onclick="resetColor()">
+      </form>
+{%endif%}
+      <br><br>
+
+  </div>
+
+</center>
+
+{% endblock %}

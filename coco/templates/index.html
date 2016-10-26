@@ -1,0 +1,11 @@
+<!DOCTYPE html>
+{% extends "layout.html" %}
+{% block body %}
+<div id="form">
+    <dl>
+    <dd><a href=" {{ url_for('log') }}"><button id="submit">Login</button></a>
+    <dd><a href="{{ url_for('reg') }}"><button id="submit">Register</button></a>
+    </dl>
+</div>
+
+{% endblock %}

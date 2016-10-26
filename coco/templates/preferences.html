@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+{% extends "layout.html" %}
+{% block body %}
+<div id="form_2" style="margin-left:0.5em; margin-right:0.5em;">
+    <table border=".5" id="timeslots" >
+        <tr>
+            <th>&nbsp;</th>
+            <th>Monday</th>
+            <th>Tuesday</th>
+            <th>Wednesday</th>
+            <th>Thursday</th>
+            <th>Friday</th>
+            <th>Course</th>
+        </tr>
+			{% for time in times %}
+                <tr>                   
+                    {% if times.index(time) in prefs %}
+                     	<th rowspan={{ rowspan(prefs[times.index(time)]) }}> {{time}}</th>
+                    	{% for course in prefs[times.index(time)] %}
+                    		<tr>
+                    			{% for weekday in range(5) %}
+                    				{% if weekday in prefs[times.index(time)][course] %}
+                    					<td><div id="mult_time"  style="background:{{prefs[times.index(time)][course][weekday][0][1]}}">{{course}}</div></td>
+                    				{% else %}
+                    					<td></td>
+                    				{% endif %}
+                    			{% endfor %}
+                    			<td>{{course}}</td>
+                    		</tr>
+                    	{% endfor %}
+                    {% else %}
+                    	<th >{{time}}</th>
+                    	<td></td>
+                    	<td></td> 
+                    	<td></td>
+                    	<td></td> 
+                    	<td></td> 
+                    	<td></td>
+                    {% endif %}
+                    	
+                    
+                </tr>
+             {% endfor %}
+    </table>
+</div>
+
+<br><br>
+{% endblock %}

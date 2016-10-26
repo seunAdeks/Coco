@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+{% extends "layout.html" %}
+{% block body %}
+
+
+<script>
+var color = '';
+function markTimeSlot(obj, labelId){
+         <!-- Marks time slot-->
+          if(obj.style.backgroundColor == '' ){
+            obj.style.backgroundColor = 'lightgrey';
+            color = 1;
+            if (document.getElementById("reasons").value != 0) {
+            	document.getElementById(labelId).textContent = document.getElementById("reasons").options[document.getElementById("reasons").selectedIndex].text;
+            }
+            else if ((document.getElementById("reasons").value == 0)&&(document.getElementById("other_reason").value != '')) {
+            	document.getElementById(labelId).textContent = document.getElementById("other_reason").value;
+            	}
+            updateValue(obj, color);
+          }else{
+            obj.style.backgroundColor = '';
+            color = 0;
+            document.getElementById(labelId).textContent = '';
+            updateValue(obj, color);
+          }
+}
+<!-- Reset all marked timeslots -->
+function resetColor(completely) {
+if (completely == true) { document.getElementById("reasons").value = ''; }
+var x = document.getElementById("timeslots").getElementsByTagName("td");
+      for (var i=0; i<x.length; i++){
+              x[i].style.backgroundColor = '';
+               updateValue(x[i], 0);
+       }
+       for(var i=0;i<5;i++){
+       	for(var j=0;j<5;j++){
+       		document.getElementById("lab"+i+j).textContent='';
+       	}
+       }
+}
+
+function updateValue(obj, color){
+    obj.children[0].value = color;
+}
+
+function loadMarks(){
+data = JSON.stringify(document.getElementById("reasons").options[document.getElementById("reasons").selectedIndex].value);
+
+$.ajax({
+		url:document.URL,
+		type:"POST",
+		contentType: "application/json",
+		data: data,
+		success: function( response ){
+			document.open();
+			document.write(response);
+			document.close();
+		},
+		error: function( xhr, status, errorThrown ) {
+        	alert( "Sorry, there was a problem!" );
+        	console.log( "Error: " + errorThrown );
+	        console.log( "Status: " + status );
+	        console.dir( xhr );
+        }});
+}
+function setReason(){
+	var x = document.getElementById("timeslots").getElementsByTagName("td");
+		var counter = 0;
+	      for (var i=0; i<x.length; i++){
+	      	if (x[i].children[0].value != 0) x[i].children[1].textContent = document.getElementById("other_reason").value;
+	       }  
+}
+<!-- Check if the required fields are filled -->
+function checkVals() {
+	var errmsg = "";
+	if (document.getElementById("reasons").value == "")
+		errmsg = "Select the reason for marking timeslots";
+	if (document.getElementById("reasons").value == "0")
+	    if (document.getElementById("other_reason").value == "")
+	    		errmsg = "Please specify the reason for marking timeslots";
+	var x = document.getElementById("timeslots").getElementsByTagName("td");
+	var counter = 0;
+      for (var i=0; i<x.length; i++){
+      	if (x[i].children[0].value != 0) counter++;
+       }   
+    var opttext = document.getElementById("reasons").options[document.getElementById("reasons").selectedIndex].text;
+	if (counter == 0) errmsg += "\nThere are no new marks to be saved.\nPrevious marks for '"+opttext+"' will be deleted";
+	if (errmsg!="") alert(errmsg);  
+ }
+
+ function enableComment(obj){
+    if (obj.selectedIndex == document.getElementById("reasons").children.length-1)
+    {
+        document.getElementById("other_reason").style.display = 'inline';
+    }
+    else
+    {
+        document.getElementById("other_reason").value = "";
+        document.getElementById("other_reason").style.display = 'none';
+    }
+    loadMarks();
+ }
+</script>
+
+<div class="metanav" >
+
+    <label name="msg" style="font-size:14px;font-style:oblique;text-align:center;display:block;">
+    Select the reason and mark timeslots.<br>
+     Information about "busy" timeslots will be shown to lecturers.
+     </label>
+
+</div>
+
+<center>
+
+  <div style="margin-top:20px">
+
+
+      <form class="form" action="{{ url_for('save_marks', **request.args) }}" method="POST">
+
+          <select tabIndex="1" name="reasons" id="reasons" style="width:auto" onchange="loadMarks();">
+              <option value="" disabled selected>Reason to mark timeslot</option>
+                {% for r in reasons%}
+                 {% if r.reason_id == current %}
+              	  <option selected="selected" value="{{r.reason_id}}">{{r.comment}}</option>
+             		{%else%}
+                   <option value="{{r.reason_id}}">{{r.comment}}</option> 
+                 {% endif%}
+                {% endfor %}
+              {% if current == 0%}
+              	<option value="0" selected="selected"> Other...</option>
+              {% else %}
+	              <option value="0"> Other...</option>
+              {% endif%}
+          </select>
+          &nbsp;
+             {% if other_reason %}
+             	<input style="display:inline;" id="other_reason" name="other_reason" onblur="setReason();" >
+             {% else %}
+             	<input style="display:none;" id="other_reason" name="other_reason" onblur="setReason();" >
+             {% endif %}
+            <br>
+          <a href="#" class="tooltip">
+            <img id="infobutton" src="{{ url_for('static', filename='MB__info.png') }}" />
+              <span style="width:auto;">
+                  <h5>Marking hint</h5>
+                  <ul>
+                      <li>Grey (one click): Timeslot reserved</li>
+                      <li>White: Timeslot is free</li>
+                  </ul>
+                  <h5>To remove previous mark click on the timeslot to make it white.<br>
+                  	Save your marks before switching to another reason.
+                  </h5>
+              </span>
+          </a>
+
+
+          <table border=".5" id="timeslots">
+              <tr>
+                  <th>&nbsp;</th>
+                  <th>Monday</th>
+                  <th>Tuesday</th>
+                  <th>Wednesday</th>
+                  <th>Thursday</th>
+                  <th>Friday</th>
+              </tr>
+             {% for time in times %}
+                <tr>
+                    <th> {{time}}</th>
+                    {% for index in range(5) %}
+                        {% if index in prefs%}
+                            {% if times.index(time) in prefs[index] %}
+                                <td onclick="markTimeSlot(this,'lab{{times.index(time)}}{{index}}')" style="background:{{prefs[index][times.index(time)][0][1]}}">
+                                    <input type="hidden" value="{{prefs[index][times.index(time)][0][0]}}"  name="{{times.index(time)}}{{index}}" >
+                                    <label id="lab{{times.index(time)}}{{index}}" class="labelincell">{{prefs[index][times.index(time)][0][2]}}</label>
+                                </td>
+                            {% else %}
+                                <td onclick="markTimeSlot(this,'lab{{times.index(time)}}{{index}}')" ><input type="hidden" value=0 name="{{times.index(time)}}{{index}}" >
+                                	<label id="lab{{times.index(time)}}{{index}}" class="labelincell"></label>
+                                </td>
+                             {% endif %}
+                        {% else %}
+                            <td onclick="markTimeSlot(this,'lab{{times.index(time)}}{{index}}')" ><input type="hidden" value=0 name="{{times.index(time)}}{{index}}" >
+                            	<label id="lab{{times.index(time)}}{{index}}" class="labelincell"></label>
+                            </td>
+                        {% endif %}
+                    {% endfor %}
+                </tr>
+                {% endfor %}
+          </table>
+          <br><br>
+
+          <input id="submit" type="submit" value="Submit" onclick="checkVals()">
+          <input id="submit" type="reset" value="Reset" onclick="resetColor(true)">
+      </form>
+      <br><br>
+
+  </div>
+
+</center>
+
+{% endblock %}

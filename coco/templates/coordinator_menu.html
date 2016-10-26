@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+{% extends "layout.html" %}
+{% block body %}
+<script>
+function checkVals() {
+	var errmsg = "";
+	if (document.getElementsByName("course")[0].value == "")
+		errmsg += "Fill in the course";
+	if (document.getElementsByName("field")[0].value == "")
+		errmsg += "\nFill in the course field specialization";
+	if (document.getElementsByName("estimate")[0].value == "")
+	    errmsg += "\nFill in the number of estimated students";
+	if (errmsg!=""){
+	 alert(errmsg);
+	 return false;
+	 }
+}
+function loading(){
+            $("#loading").show();
+            $('#loading').css('display', 'inline-block');
+            $("#content").hide();
+}
+
+</script>
+<div id="coor-menu">
+    <dl>
+        <dd><a href="{{ url_for('update_passphrase',**request.args) }}">
+            <button id="submit">Update Passphrase</button>
+        </a>
+        <dd><a href="{{ url_for('add_course',**request.args) }}">
+            <button id="submit">Edit Courses</button>
+        </a>
+        <dd><a href="{{ url_for('pref',**request.args) }}">
+            <button id="submit">Preferences</button>
+        </a>
+        <dd><a href="{{ url_for('current_schedule',**request.args) }}">
+            <button id="submit">Current Schedule</button>
+        </a>
+        <dd><a href="{{ url_for('schedules',**request.args) }}">
+            <button id="submit" onclick="loading();">Schedules</button>
+        </a>
+        <dd><a href="{{ url_for('modify_view',**request.args) }}">
+            <button id="submit">Modify Constraints</button>
+        </a>
+        <dd><a href="{{ url_for('mark_timeslots',**request.args) }}">
+            <button id="submit">Mark Timeslots</button>
+        </a>
+    </dl>
+</div>
+<div id="loading"><label>This might take a while</label><img src="{{ url_for('static', filename='ajax-loader.gif') }}" style="height:40px;width:40px;" ></div>
+<div id="content">
+{% if not add  and not passp%}
+<div id="list">
+    <h2>Current Courses</h2>
+    <ul>
+        {% for c in courses%}
+        <li>{{ c.course }} ({{ c.field }}, {{c.students_number}})</li>
+        {% endfor %}
+    </ul>
+</div>
+<div id="list">
+    <h2>Lecturers</h2>
+    <ul>
+        {% for l in lecturers %}
+        <li>{{ l.name }}</li>
+        {% endfor %}
+    </ul>
+</div>
+{% endif %}
+
+
+    {% if add and not passp%}
+<div id="list" style="margin: unset;">
+    <dl>
+        {% if not course_edit %}
+        <form onsubmit="return checkVals(this)" action="{{url_for('course', **request.args)}}" method="POST">
+            <dd><input type="text" name="course" placeholder="Course">
+            <dd><input type="text" name="field" placeholder="Field">
+            <dd><input type="text" name="estimate" placeholder="Estimated number of Students"></dd>
+            <dd><input id="submit" type="submit" value="Add" onclick="return checkVals()">
+
+        </form>
+        {% else %}
+        <form onsubmit="return checkVals(this)" action="{{url_for('update_course', **request.args)}}" method="POST">
+            <dd><input type="text" name="course" value="{{course_edit[1]}}">
+            <dd><input type="text" name="field" value="{{course_edit[2]}}">
+            <dd><input type="text" name="estimate" value="{{course_edit[3]}}"></dd>
+            <dd><input type="number" name="id" value="{{course_edit[0]}}" style="display: none;">
+            <dd><input id="submit" type="submit" value="Update" onclick="return checkVals()">
+
+        </form>
+
+        {% endif %}
+
+        <dd><a href="{{ url_for('coordinator_menu', **request.args) }}">
+            <button id="submit">Cancel</button>
+        </a>
+    </dl>
+
+</div>
+<div id="list" style="width: 40%;margin: unset;">
+    <form action="{{url_for('edit_course', **request.args)}}" method="POST">
+    <ul>
+        <li><h2>Current Courses</h2></li>
+        {% for cour in courses%}
+        <li>
+            <label class="checkbox" for="{{cour.id}}" style="font-size:12pt;">
+                 <input type="radio" name="course" value="{{cour.id}}" id ="{{cour.id}}">
+                 {{ cour.course }},  {{ cour.field }}, {{cour.students_number}}
+            </label>
+
+            </li>
+            {% endfor %}
+        <li><input id="submit" type="submit" value="Edit Course">
+        </a></li>
+    </ul>
+    </form>
+</div>
+        {% endif %}
+
+
+<div id="list">
+
+    {% if passp and not add%}
+    <dl>
+        <form action="{{url_for('passphrase', **request.args)}}" method="POST" >
+            <dd><input type="password" name="passphrase" placeholder="Passphrase">
+            <dd><input id="submit" type="submit" value="Update">
+
+        </form>
+        <dd><a href="{{ url_for('coordinator_menu',**request.args) }}">
+            <button id="submit">Cancel</button>
+        </a>
+    </dl>
+    {% endif %}
+</div>
+</div>
+{% endblock %}

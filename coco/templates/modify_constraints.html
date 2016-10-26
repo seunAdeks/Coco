@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+{% extends "layout.html" %}
+{% block body %}
+
+
+<div id="checkbox">
+        <h3 style="margin-left:20px;">Constraints
+                {% for constr in active%}
+                {{constr[1]}},
+                {% endfor %}
+                are active.
+        </h3>
+    <form action="{{url_for('modify_constraints', **request.args)}}">
+			{% if 'c1' in active %}
+				<input type="checkbox" id="c1" name="c1" value="c1" checked>
+			{% else %}	
+            	<input type="checkbox" id="c1" name="c1" value="c1">
+            {% endif %}
+            <label for="c1">1. One day interval between core course lectures</label><br>
+			
+			{% if 'c2' in active %}
+				<input type="checkbox" id="c2" name="c2" value="c2" checked>
+			{% else %}	
+            	<input type="checkbox" id="c2" name="c2" value="c2">
+            {% endif %}
+            <label for="c2">2. Core courses should not overlap</label><br>
+			
+			{% if 'c3' in active %}
+				<input type="checkbox" id="c3" name="c3" value="c3" checked>
+			{% else %}	
+            	<input type="checkbox" id="c3" name="c3" value="c3">
+            {% endif %}
+            <label for="c3">3. Core courses must have two lecture slots in a week </label><br>
+			
+			{% if 'c4' in active %}
+				<input type="checkbox" id="c4" name="c4" value="c4" checked>
+			{% else %}	
+            	<input type="checkbox" id="c4" name="c4" value="c4">
+            {% endif %}
+            <label for="c4">4. Schedule should be balanced, no bias </label><br>
+			
+			{% if 'c5' in active %}
+				<input type="checkbox" id="c5" name="c5" value="c5" checked>
+			{% else %}	
+            	<input type="checkbox" id="c5" name="c5" value="c5">
+            {% endif %}
+            <label for="c5">5. No overlap of core courses and advanced of same field </label><br><br>
+
+			<input type="checkbox" id="c6" name="c6" value="c6" checked disabled readonly>
+            <label for="c6">6. Lecture halls with enough space as estimated students for a course </label><br>
+
+			<input type="checkbox" id="c7" name="c7" value="c7" checked disabled readonly>
+            <label for="c7">7. No two courses should take place in the same hall, time and date.</label><br><br>
+			
+			{% if 'c8' in active %}
+				<input type="checkbox" id="c8" name="c8" value="c8" checked>
+			{% else %}	
+            	<input type="checkbox" id="c8" name="c8" value="c8">
+            {% endif %}
+            <label for="c8">8. No course should be scheduled on a blocked time period except set by lecturer</label><br>
+			
+			{% if 'c9' in active %}
+				<input type="checkbox" id="c9" name="c9" value="c9" checked>
+			{% else %}	
+            	<input type="checkbox" id="c9" name="c9" value="c9">
+            {% endif %}
+            <label for="c9">9. Don't assign timeslots tagged "Red"</label><br>
+            <br>
+            <input id="submit" type="submit" value="Save" style="float:left;margin-left:30%;">
+            <!--<input id="submit" type="reset" value="Back"  style="margin-left:10%;" onclick="window.history.back();">-->
+    </form>
+
+</div>
+{% endblock %}

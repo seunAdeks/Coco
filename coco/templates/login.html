@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+{% extends "layout.html" %}
+{% block body %}
+        {% if error %} <p class="error"><strong>Error:</strong> {{ error }}{% endif %}
+    {% if not reset %}
+    <div id="form">
+        <form id="form_inside" action="{{ url_for('login') }}" method="post">
+            <dl>
+
+                <dd><input class="tb5" type="text" name="username" placeholder="Username">
+
+                <dd><input class="tb5" type="password" name="password" placeholder="Password">
+                <dd><a id="reset" href="{{url_for('reset')}}">Forgot Password?</a>
+                <dd><input id="submit" type="submit" value="Login">
+            </dl>
+        </form>
+
+    </div>
+    {% elif reset and link %}
+    <div id="form">
+        <form action="{{ url_for('reset_password') }}" method="post">
+            <dl>
+
+                <dd><input class="tb5" type="text" name="email" placeholder="email">
+                <dd><input id="submit" type="submit" value="Reset">
+            </dl>
+        </form>
+
+    </div>
+    {% elif not link %}
+    <div id="form">
+        <form id="form_inside" action="{{ url_for('resetting') }}" method="post">
+            <dl>
+
+                <dd><input class="tb5" type="password" name="password" placeholder="New Password">
+                <dd><input class="tb5" type="password" name="confirm_password" placeholder="Confirm - New Password">
+                <dd><input id="submit" type="submit" value="Reset">
+            </dl>
+        </form>
+
+    </div>
+    {% endif %}
+    <br><br>
+{% endblock %}

@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+{% extends "layout.html" %}
+{% block body %}
+<div id="form">
+        <dl>
+        <form action="{{url_for('new_semester', **request.args)}}" method="POST">
+                <dd><select tabIndex="1" name="semester" id="semester">
+                         <option value="" disabled selected>Semester</option>
+                         <option value="winter semester">Winter Semester</option>
+                         <option value="summer semester">Summer Semester</option>
+                    </select>
+                <dd><input class="tb5" type="text" name="year" placeholder="year">
+                <dd><input id="submit" type="submit" value="Add">
+        </form>
+            <dd><a href="{{ url_for('coordinators', **request.args) }}"><button id="submit">Cancel</button>
+        </dl>
+</div>
+{% endblock %}

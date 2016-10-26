@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+{% extends "layout.html" %}
+{% block body %}
+<script>
+function clearStorage(){
+    localStorage.removeItem("tabl");
+    localStorage.removeItem("bool");
+}
+</script>
+<center>
+
+    <table class="schedules" border=".5">
+
+        <tr>
+
+            <th>&nbsp;</th>
+
+            <th>Monday</th>
+
+            <th>Tuesday</th>
+
+            <th>Wednesday</th>
+
+            <th>Thursday</th>
+
+            <th>Friday</th>
+
+        </tr>
+
+{% for schedule, tups in solution.items() %}
+        <tr>
+                <th> {{schedule}}</th>
+            {% for course, tup in tups.items()%}
+                {% if  loop.index > 5 %}
+                                {{''}}
+
+                {% elif tup==()%}
+                    <td></td>
+                {% elif tup[0] == "Monday"%}
+                    <td>{{course[:-1]}}
+                        {{tup[2]}}
+                    </td>
+
+
+                {% elif tup[0] == "Tuesday"%}
+                <td>{{course[:-1]}}
+                    {{tup[2]}}
+                </td>
+
+
+                {% elif tup[0] == "Wednesday"%}
+                <td>{{course[:-1]}}
+                    {{tup[2]}}
+                </td>
+
+
+                {% elif tup[0] == "Thursday"%}
+                <td>{{course[:-1]}}
+                    {{tup[2]}}
+                </td>
+
+
+                {% elif tup[0] == "Friday"%}
+                <td>{{course[:-1]}}
+                    {{tup[2]}}
+                </td>
+                {% else %}
+                <td></td>
+                {% endif %}
+            {% endfor %}
+        </tr>
+
+{% endfor %}
+</table>
+    </center>
+        <br>
+
+{% if not display %}
+<center>        
+<TABLE BORDER="0" style="width:90%; border:none;">
+<TR>
+<TD style="background: initial;border:none;" >
+    <form action="{{ url_for('schedules',**request.args) }}" method="POST">
+        <input type="hidden" value=1 name="oldsolution" >
+          <button id="submit" value="previous" >Previous</button>
+        </form>
+    </td>
+        <td style="background: initial;border:none;" >
+    <form action="{{ url_for('save_schedule',**request.args) }}" method="POST">
+        <input type="hidden" value={{solution_num}} name="solution_number" >
+          <button id="submit" onclick="clearStorage()" value="Save current schedule">Save current schedule</button>
+        </form>
+        </td>
+        <td style="background: initial;border:none;" >
+    <form action="{{ url_for('schedules',**request.args) }}" method="POST">
+            <input type="hidden" value=1 name="newsolution" >
+          <button id="submit" value="next"  >Next</button>
+      </form>
+      </td>
+</tr>
+</table>
+</center>
+{% endif %}
+{% endblock %}
